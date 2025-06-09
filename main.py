@@ -86,9 +86,27 @@ def display_pokemon_on_route(route_index):
         id = get_pokemon_id_by_name(pokemon[0])
         display_pokemon(id, pokemon[0], pokemon[1], pokemon[2])
 
+method_color = {
+    'Grass' : 'light_green',
+    'Surf' : 'blue',
+    'Game Corner' : 'magenta',
+    'Old Rod' : 'cyan',
+    'Good Rod' : 'cyan',
+    'Super Rod' : 'cyan',
+    'Raid' : 'light_red'
+}
+
+time_color = {
+    'Day' : 'light_yellow',
+    'Night' : 'blue',
+    'All' : 'white'
+}
+
 def display_pokemon(id, name, method, time):
     p = get_pokemon_by_id(id)
-    cprint(name, "green", attrs=["bold"])
+    cprint(name, attrs=["bold"])
+    cprint("\t"+method, method_color[method])
+    cprint("\t"+time, time_color[time])
 
 def get_pokemon_by_id(id):
     return data["species"][id]
