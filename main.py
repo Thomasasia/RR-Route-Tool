@@ -306,13 +306,14 @@ def display_stat(index, value, max_bars = 16, tabs = 1):
     print()
 
 
-def display_pokemon(pokemon):
+def display_pokemon(pokemon, show_evos = True, skip_method = False):
     print("=" * columns)
     cprint(pokemon["name"], attrs=["bold"])
-    cprint("\tMethod : ", "white", end="")
-    cprint(""+pokemon["method"], method_color[pokemon["method"]])
-    cprint("\tTime   : ", "white", end="")
-    cprint(""+pokemon["time"], time_color[pokemon["time"]])
+    if not skip_method:
+        cprint("\tMethod : ", "white", end="")
+        cprint(""+pokemon["method"], method_color[pokemon["method"]])
+        cprint("\tTime   : ", "white", end="")
+        cprint(""+pokemon["time"], time_color[pokemon["time"]])
     pkm = pokemon["pokemon_data"]
     display_image(get_image(pokemon["id"]))
     print("\t", end='')
@@ -359,6 +360,12 @@ def display_pokemon(pokemon):
                 if not skip:
                     cprint("Egg Moves", attrs=["bold"])
                     print_moves(pkm["eggMoves"])
+    if show_evos and "evolutions" in pkm.keys():
+        skip = skip_input("this Pokemon's Evolutions")
+        if not skip:
+            for evo in pkm["evolutions"]:
+                ev = get_pokemon_by_id(str(evo[2]))
+                display_pokemon({"name" : ev["name"], "id" : str(evo[2]), "pokemon_data" : ev}, True, True)
 
 
 
