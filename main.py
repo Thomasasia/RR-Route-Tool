@@ -68,7 +68,7 @@ for r in data["areas"]:
     def add_pokemon_to_route(name, key, method, time):
         #print("KEYS : " + str(r.keys()))
         if not key in r.keys():
-            print(key + "    " + name + " Skipping " + key)
+            # print(key + "    " + name + " Skipping " + key)
             return
         id = 0
         for n in r[key].keys(): # not sure what this number is used for
@@ -173,6 +173,31 @@ method_color = {
     "Trade" : "yellow"
 }
 
+type_color = {
+    'Normal'   : colored("  Normal   ", "white", "on_grey"),
+    'Fire'     : colored("   Fire    ", "white", "on_red"),
+    'Water'    : colored("  Water    ", "blue", "on_cyan"),
+    'Electric' : colored(" Electric  ", "white", "on_yellow"),
+    'Grass'    : colored("  Grass    ", "white", "on_green"),
+    'Ice'      : colored("   Ice     ", "white", "on_cyan"),
+    'Fighting' : colored(" Fighting  ", "white", "on_red", attrs=["dark"]),
+    'Poison'   : colored("  Poison   ", "light_grey", "on_magenta"),
+    'Ground'   : colored("  Ground   ", "yellow", "on_red", attrs=["dark"]),
+    'Flying'   : colored("  Flying   ", "cyan", "on_light_grey"),
+    'Psychic'  : colored(" Psychic   ", "cyan", "on_magenta"),
+    'Bug'      : colored("   Bug     ", "yellow", "on_green", attrs=["dark"]),
+    'Rock'     : colored("   Rock    ", "red", "on_yellow", attrs=["dark"]),
+    'Ghost'    : colored("  Ghost    ", "magenta", "on_black"),
+    'Dragon'   : colored("  Dragon   ", "magenta", "on_blue"),
+    'Dark'     : colored("   Dark    ", "white", "on_black"),
+    'Steel'    : colored("  Steel    ", "light_grey", "on_dark_grey"),
+    'Fairy'    : colored("  Fairy    ", "white", "on_magenta")
+}
+def get_type(id):
+    return data["types"][str(id)]["name"]
+def get_ability(id):
+    ability =  data["abilities"][str(id)]
+    return [ability["names"], ability["description"]]
 import base64
 from term_image.image import from_file
 
@@ -181,6 +206,26 @@ time_color = {
     'Night' : 'blue',
     'All' : 'white'
 }
+ # used to calculate the size of the bars in the terminal
+max_stats = [
+    255, # hp
+    190, # attack
+    230, # defense
+    200, # speed
+    194, # special attack
+    230, # spd
+    780  # total
+]
+stat_names = [
+    "Health  ",
+    "Atk     ",
+    "Def     ",
+    "Speed   ",
+    "S Atk   ",
+    "S Def   ",
+    "Total   "
+
+]
 
 def get_image(id):
     d = data["sprites"][id].split(",")[1].encode()
@@ -193,10 +238,40 @@ def display_image(img):
     with open("imageToSave.png", "wb") as fh:
         fh.write(base64.decodebytes(img))
 
-    image = from_file("imageToSave.png")
+    image = from_file("imageCache.png")
     image.set_size(width = 50, height = 25)
     image.draw(h_align="left", v_align="top", pad_height = 20, pad_width=40, check_size = False)
     image.close()
+
+MAX_STAT_DIGITS = 4 # one exta for the space
+def display_stat(index, value, max_bars = 16, tabs = 1):
+    print("\t" * tabs, end='')
+    print(stat_names[index], end='')
+    str_num = str(value)
+    if len(str_num) < MAX_STAT_DIGITS:
+        str_num += " " * (MAX_STAT_DIGITS - len(str_num) )
+    
+
+    
+    num_bars = int((value / max_stats[index]) * max_bars)
+
+    num_bars = int(min(num_bars, max_bars))
+    color = ""
+    ratio = float(num_bars) / float(max_bars)
+    if ratio <= 0.2:
+        color = "red"
+    elif ratio <= 0.4:
+        color = "yellow"
+    elif ratio <= 0.6:
+        color = "green"
+    elif ratio <= 0.8:
+        color = "magenta"
+    elif ratio <= 1.0:
+        color = "cyan"
+
+    cprint(str_num, color, end='')
+    
+    cprint("█"*num_bars, color)
 
 def display_pokemon(pokemon):
     cprint(pokemon["name"], attrs=["bold"])
@@ -206,13 +281,25 @@ def display_pokemon(pokemon):
     cprint(""+pokemon["time"], time_color[pokemon["time"]])
     pkm = pokemon["pokemon_data"]
     display_image(get_image(pokemon["id"]))
+    print("\t", end='')
+    for t in pkm["type"]:
+        cprint(type_color[get_type(t)], end="")
+    print()
+    print()
+    for i in range(len(pkm["abilities"])):
+        if pkm["abilities"][i][0] == 0:
+            continue
+        print("\t", end='')
+        if(i == len(pkm["abilities"]) - 1):
+            print("(Hidden) ", end='')
+        name, description = get_ability(pkm["abilities"][i][0])
+        cprint(name[0], attrs=["bold"])
+        print("\t\t" + description)
+    print()
+    for i in range(len(pkm["stats"])):
+        display_stat(i, pkm["stats"][i])
+    display_stat(len(pkm["stats"]), sum(pkm["stats"]))
 
 
 
 route_select()
-
-
-
-
-
-display_image()
