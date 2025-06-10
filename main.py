@@ -335,7 +335,9 @@ def display_pokemon(pokemon, show_evos = True, skip_method = False):
         display_stat(i, pkm["stats"][i])
     display_stat(len(pkm["stats"]), sum(pkm["stats"]))
     print()
-    def skip_input(thing):
+    def skip_input(thing, override = False):
+        if override:
+            return True
         inp = input("Enter to view " + thing + ", type to skip")
         if len(inp) > 0:
             return True
@@ -348,15 +350,15 @@ def display_pokemon(pokemon, show_evos = True, skip_method = False):
         moves = list(moves)
         levels = list(levels)
         print_moves(moves, levels)
-        skip = skip_input("TM moves")
+        skip = skip_input("TM moves", "tmMoves" in pkm.keys())
         if not skip:
             cprint("TM Moves", attrs=["bold"])
             print_moves(pkm["tmMoves"])
-            skip = skip_input("Tutor Moves")
+            skip = skip_input("Tutor Moves", "tutorMoves" in pkm.keys())
             if not skip:
                 cprint("Tutor Moves", attrs=["bold"])
                 print_moves(pkm["tutorMoves"])
-                skip = skip_input("Egg Moves")
+                skip = skip_input("Egg Moves", "eggMoves" in pkm.keys())
                 if not skip:
                     cprint("Egg Moves", attrs=["bold"])
                     print_moves(pkm["eggMoves"])
